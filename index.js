@@ -1,6 +1,7 @@
 import express, { json } from "express";
 import mongoose from "mongoose";
 import Flight from "./models/flight.model.js";
+import Hotel from "./models/hotel.model.js";
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,15 @@ app.get("/api/flights", async (req, res) => {
   try {
     const flights = await Flight.find({});
     res.status(200).json(flights);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/hotels", async (req, res) => {
+  try {
+    const hotel = await Hotel.create(req.body);
+    res.status(200).json(hotel);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
