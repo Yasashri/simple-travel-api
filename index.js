@@ -1,37 +1,42 @@
-import express, { json } from "express";
+import express, { json, urlencoded } from "express";
 import mongoose from "mongoose";
-import Flight from "./models/flight.model.js";
-import Hotel from "./models/hotel.model.js";
+import { Flight, Hotel, Vehicle } from "./models/index.js";
+import flightRoute from "./routes/flight.route.js";
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use("/api/flights", flightRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello from Node API");
 });
 
-app.post("/api/flights", async (req, res) => {
-  try {
-    const flight = await Flight.create(req.body);
-    res.status(200).json(flight);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
 
-app.get("/api/flights", async (req, res) => {
-  try {
-    const flights = await Flight.find({});
-    res.status(200).json(flights);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
 
 app.post("/api/hotels", async (req, res) => {
   try {
     const hotel = await Hotel.create(req.body);
     res.status(200).json(hotel);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/vehicles", async (req, res) => {
+  try {
+    const vehicle = await Vehicle.create(req.body);
+    res.status(200).json(vehicle);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get("/api/vehicles", async (req, res) => {
+  try {
+    const vehicle = await Vehicle.find({});
+    res.status(200).json(vehicle);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
