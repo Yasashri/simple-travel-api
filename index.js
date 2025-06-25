@@ -1,42 +1,35 @@
-import express, { json, urlencoded } from "express";
+import express from "express";
 import mongoose from "mongoose";
-import { Flight, Hotel, Vehicle } from "./models/index.js";
+import { Hotel, Flight, Vehicle } from "./models/index.js";
 import flightRoute from "./routes/flight.route.js";
+import hotelRoutes from "./routes/hotel.route.js";
+import vehicleRoutes from "./routes/vehicle.route.js";
+import userRoutes from "./routes/user.route.js";
+import bookingRoutes from "./routes/booking.route.js";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/flights", flightRoute);
+app.use("/api/hotels", hotelRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/bookings", bookingRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello from Node API");
-});
-
-
-
-app.post("/api/hotels", async (req, res) => {
+app.get("/api/", async (req, res) => {
   try {
-    const hotel = await Hotel.create(req.body);
-    res.status(200).json(hotel);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+    const [flights, hotels, vehicles] = await Promise.all([
+      Flight.find().sort({ createdAt: -1 }).limit(10),
+      Hotel.find().sort({ createdAt: -1 }).limit(10),
+      Vehicle.find().sort({ createdAt: -1 }).limit(10),
+    ]);
 
-app.post("/api/vehicles", async (req, res) => {
-  try {
-    const vehicle = await Vehicle.create(req.body);
-    res.status(200).json(vehicle);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-app.get("/api/vehicles", async (req, res) => {
-  try {
-    const vehicle = await Vehicle.find({});
-    res.status(200).json(vehicle);
+    res.status(200).json({
+      flights,
+      hotels,
+      vehicles,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
