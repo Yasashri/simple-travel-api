@@ -11,7 +11,7 @@ const insertHotelData = async (req, res) => {
 
 const getHotels = async (req, res) => {
   try {
-    const hotel = await Hotel.create(req.body);
+    const hotel = await Hotel.find({});
     res.status(200).json(hotel);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -22,6 +22,9 @@ const getSingleHotel = async (req, res) => {
   try {
     const { id } = req.params;
     const hotel = await Hotel.findById(id);
+    if(!hotel){
+      return res.status(404).json({message: "Hotel not found"});
+    }
     res.status(200).json(hotel);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -17,6 +17,8 @@ app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/bookings", bookingRoutes);
 
+// Home page route is here
+
 app.get("/api/", async (req, res) => {
   try {
     const [flights, hotels, vehicles] = await Promise.all([

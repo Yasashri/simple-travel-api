@@ -11,7 +11,7 @@ const insertFlightData = async (req, res) => {
 
 const getFlights = async (req, res) => {
   try {
-    const flight = await Flight.create(req.body);
+    const flight = await Flight.find({});
     res.status(200).json(flight);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -22,7 +22,11 @@ const getSingleFlight = async (req, res) => {
   try {
     const { id } = req.params;
     const flight = await Flight.findById(id);
-    res.status(200).json(flight);
+    if (!flight) {
+      return res.status(404).json({ message: "Flight not found" });
+    } else {
+      res.status(200).json(flight);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -57,4 +61,10 @@ const deleteFlight = async (req, res) => {
   }
 };
 
-export { getFlights, getSingleFlight, updateFlight, deleteFlight, insertFlightData };
+export {
+  getFlights,
+  getSingleFlight,
+  updateFlight,
+  deleteFlight,
+  insertFlightData,
+};

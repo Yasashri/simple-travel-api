@@ -11,18 +11,20 @@ const createUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { userEmail, userPassword } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ userEmail });
+
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(userPassword, user.userPassword);
+
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    const { password: pw, ...userWithoutPassword } = user.toObject();
+    const { userPassword: pw, ...userWithoutPassword } = user.toObject();
 
     res.status(200).json({
       message: "Login successful",
@@ -34,15 +36,13 @@ const loginUser = async (req, res) => {
 };
 
 const changeUserPassword = async (req, res) => {
-  const { userId } = req.params;
+  const { id } = req.params;
   const { newPassword } = req.body;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: "User not found" });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    user.userPassword = newPassword;
 
     await user.save();
 
@@ -53,10 +53,10 @@ const changeUserPassword = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const { userId } = req.params;
+  const { id } = req.params;
 
   try {
-    const deletedUser = await User.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
     }
