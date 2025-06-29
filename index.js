@@ -6,10 +6,18 @@ import hotelRoutes from "./routes/hotel.route.js";
 import vehicleRoutes from "./routes/vehicle.route.js";
 import userRoutes from "./routes/user.route.js";
 import bookingRoutes from "./routes/booking.route.js";
+import cors from "cors";
+import Fuse from "fuse.js";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 app.use("/api/flights", flightRoute);
 app.use("/api/hotels", hotelRoutes);
@@ -19,7 +27,7 @@ app.use("/api/bookings", bookingRoutes);
 
 // Home page route is here
 
-app.get("/api/", async (req, res) => {
+app.get("/api/home", async (req, res) => {
   try {
     const [flights, hotels, vehicles] = await Promise.all([
       Flight.find().sort({ createdAt: -1 }).limit(10),
@@ -36,6 +44,47 @@ app.get("/api/", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+app.post("/api/search", async (req, res) => {
+  const query = req.body.search;
+
+  if (!query) return res.status(400).json({ message: "Search query required" });
+
+  try {
+    const [flights, hotels, vehicles] = await Promise.all([
+      Flight.find({}),
+      Hotel.find({}),
+      Vehicle.find({}),
+    ]);
+
+    // Configure fuzzy options
+    const flightFuse = new Fuse(flights, {
+      keys: ["flightNo", "flightStart", "flightEnd"],
+      threshold: 0.1, // lower = stricter
+    });
+
+    const hotelFuse = new Fuse(hotels, {
+      keys: ["hotelName", "hotelLocation"],
+      threshold: 0.4,
+    });
+
+    const vehicleFuse = new Fuse(vehicles, {
+      keys: ["vehicleName", "vehicleType", "vehicleModel"],
+      threshold: 0.4,
+    });
+
+    res.json({
+      query,
+      flights: flightFuse.search(query).map(r => r.item),
+      hotels: hotelFuse.search(query).map(r => r.item),
+      vehicles: vehicleFuse.search(query).map(r => r.item),
+    });
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 mongoose
   .connect(
