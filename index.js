@@ -8,6 +8,8 @@ import userRoutes from "./routes/user.route.js";
 import bookingRoutes from "./routes/booking.route.js";
 import cors from "cors";
 import Fuse from "fuse.js";
+import multer from "multer";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -18,6 +20,20 @@ app.use(
     credentials: true,
   })
 );
+// Multer setup
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads"); // Make sure folder exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
+// Static serve uploads folder
+app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
+
 
 app.use("/api/flights", flightRoute);
 app.use("/api/hotels", hotelRoutes);
@@ -85,7 +101,25 @@ app.post("/api/search", async (req, res) => {
   }
 });
 
+app.post("/api/upload", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+  const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+  res.json({ imageUrl });
+});
 
+app.post("/api/uploads", upload.array("images", 10), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: "No files uploaded" });
+  }
+
+  const imageUrls = req.files.map((file) => {
+    return `http://localhost:3000/uploads/${file.filename}`;
+  });
+
+  res.json({ imageUrls });
+});
 mongoose
   .connect(
     "mongodb+srv://user:qBzbhr2aQqAxbZK1@travelc.pgydfz2.mongodb.net/travelc?retryWrites=true&w=majority&appName=travelc"
