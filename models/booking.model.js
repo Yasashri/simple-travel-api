@@ -29,13 +29,16 @@ const bookingSchema = mongoose.Schema(
       type: Number,
       min: 1,
       required: false,
-      default: 1,
     },
     flightClass: {
       type: String,
       required: false,
     },
     flightDate: {
+      type: Date,
+      required: false,
+    },
+    flightReturn: {
       type: Date,
       required: false,
     },
@@ -58,11 +61,6 @@ const bookingSchema = mongoose.Schema(
       min: 1,
       required: false,
     },
-    hotelNoOfGuests: {
-      type: Number,
-      min: 1,
-      required: false,
-    },
     hotelTotalPrice: {
       type: Number,
       required: false,
@@ -74,14 +72,14 @@ const bookingSchema = mongoose.Schema(
       type: Date,
       required: false,
     },
-    VehicleBookedTime: {
+    vehicleBookedTime: {
       type: String,
       required: false,
     },
-    vehicleBookedTotalPrice:{
-        type: Number,
-        required : false,
-    }
+    vehicleBookedTotalPrice: {
+      type: Number,
+      required: false,
+    },
   },
   {
     timestamps: true,
