@@ -50,4 +50,29 @@ const deleteBooking = async (req, res) => {
   }
 };
 
-export { insertBookingData, getBookings, deleteBooking, getSingleBooking };
+const getUserBookings = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const bookings = await Booking.find({ bookedUserId: userId })
+      .populate("bookedUserId")
+      .populate("bookedFlightId")
+      .populate("bookedHotelId")
+      .populate("bookedVehicleId");
+
+    if (bookings.length === 0) {
+      return res.status(404).json({ message: "No bookings found for this user" });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+export { insertBookingData, getBookings, deleteBooking, getSingleBooking, getUserBookings };

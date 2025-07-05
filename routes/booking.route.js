@@ -5,12 +5,13 @@ import {
   getBookings,
   deleteBooking,
   getSingleBooking,
+  getUserBookings,
 } from "../controllers/booking.controller.js";
 
 const router = express.Router();
 
 router.get("/", getBookings);
-router.get("/:id", getSingleBooking);
+router.get("/:id", getUserBookings);
 router.post("/", insertBookingData);
 router.delete("/:id", deleteBooking);
 
