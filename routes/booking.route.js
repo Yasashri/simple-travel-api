@@ -9,9 +9,8 @@ import {
 } from "../controllers/booking.controller.js";
 
 const router = express.Router();
-
+router.get("/user", getUserBookings);
 router.get("/", getBookings);
-router.get("/:id", getUserBookings);
 router.post("/", insertBookingData);
 router.delete("/:id", deleteBooking);
 
