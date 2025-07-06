@@ -38,6 +38,10 @@ const bookingSchema = mongoose.Schema(
       type: Date,
       required: false,
     },
+    flightEnd: {
+      type: String,
+      required: false,
+    },
     flightReturn: {
       type: Date,
       required: false,
