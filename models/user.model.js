@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
 const userSchema = mongoose.Schema(
   {
@@ -17,11 +17,15 @@ const userSchema = mongoose.Schema(
     },
     userPassword: {
       type: String,
-      required: [true, "Please enter a password"],
+      required: false,
     },
     userContact: {
-      type: Number,
-      required: false,
+      type: String,
+      required: function () {
+        return this.isNew;
+      },
+      trim: true,
+      minlength: [6, "Password must be at least 6 characters"],
     },
     userIsAdmin: {
       type: Boolean,
@@ -34,10 +38,17 @@ const userSchema = mongoose.Schema(
   }
 );
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("userPassword")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.userPassword = await bcrypt.hash(this.userPassword, salt);
-  next();
+  if (!this.isModified("userPassword") || !this.userPassword) {
+    return next();
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.userPassword = await bcrypt.hash(this.userPassword, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 const User = mongoose.model("User", userSchema);
 
