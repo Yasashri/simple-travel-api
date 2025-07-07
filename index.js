@@ -88,19 +88,19 @@ app.post("/api/search", async (req, res) => {
       Vehicle.find({}),
     ]);
 
-    // Configure fuzzy options
+    
     const flightFuse = new Fuse(flights, {
       keys: ["flightNo", "flightStart", "flightEnd"],
-      threshold: 0.1, // lower = stricter
+      threshold: 0.1,
     });
 
     const hotelFuse = new Fuse(hotels, {
-      keys: ["hotelName", "hotelLocation"],
+      keys: ["hotelName", "hotelLocation", "hotelCountry"],
       threshold: 0.4,
     });
 
     const vehicleFuse = new Fuse(vehicles, {
-      keys: ["vehicleName", "vehicleType", "vehicleModel"],
+      keys: ["vehicleName", "vehicleType", "vehicleModel", "vehicleCountry"],
       threshold: 0.4,
     });
 

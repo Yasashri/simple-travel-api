@@ -30,7 +30,11 @@ const hotelSchema = mongoose.Schema(
     hotelContact:{
       type: Number,
       required: [true, "Please enter contact number"],
-    }
+    },
+    hotelCountry:{
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
