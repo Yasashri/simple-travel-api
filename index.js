@@ -14,16 +14,33 @@ import path from "path";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
+
+/* app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
   })
+); */
+
+//Accepting all requests from frontend (Dev only)
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow undefined origins (like Postman) and all localhost ports
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
 );
-// Multer setup
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public/uploads"); // Make sure folder exists
+    cb(null, "public/uploads");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -31,9 +48,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Static serve uploads folder
 app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
-
 
 app.use("/api/flights", flightRoute);
 app.use("/api/hotels", hotelRoutes);
