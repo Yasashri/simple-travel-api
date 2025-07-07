@@ -1,13 +1,11 @@
 import { Flight } from "../models/index.js";
 
-// Base URL for image access
-const BASE_URL = "http://localhost:5000"; // change port as needed
+const BASE_URL = "http://localhost:5000";
 
 const insertFlightData = async (req, res) => {
   try {
     const flightData = { ...req.body };
 
-    // If image was uploaded, set the URL in flightData
     if (req.file) {
       flightData.flightImage = `${BASE_URL}/uploads/${req.file.filename}`;
     }
@@ -46,13 +44,12 @@ const updateFlight = async (req, res) => {
     const { id } = req.params;
     const updateData = { ...req.body };
 
-    // If image uploaded, update flightImage field
     if (req.file) {
       updateData.flightImage = `${BASE_URL}/uploads/${req.file.filename}`;
     }
 
     const flight = await Flight.findByIdAndUpdate(id, updateData, {
-      new: true, // return the updated document
+      new: true,
     });
 
     if (!flight) {
