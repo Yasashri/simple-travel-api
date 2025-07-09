@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow undefined origins (like Postman) and all localhost ports
+      // Allow undefined origins and all localhost ports
       if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
         callback(null, true);
       } else {
