@@ -26,6 +26,10 @@ const vehicleSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    vehicleCountry:{
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

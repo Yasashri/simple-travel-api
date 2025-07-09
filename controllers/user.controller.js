@@ -3,8 +3,19 @@ import bcrypt from "bcrypt";
 
 const createUser = async (req, res) => {
   try {
+    const { userEmail } = req.body;
+
+    const existingUser = await User.findOne({ userEmail });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "User already exists with this email" });
+    }
+
     const user = await User.create(req.body);
-    res.status(200).json(user);
+    const { userPassword, ...userWithoutPassword } = user.toObject();
+
+    res.status(200).json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -14,16 +25,24 @@ const loginUser = async (req, res) => {
   const { userEmail, userPassword } = req.body;
 
   try {
+    if (!userEmail || !userPassword) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
     const user = await User.findOne({ userEmail });
 
-    if (!user) {
+    if (!user || !user.userPassword) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
     const isMatch = await bcrypt.compare(userPassword, user.userPassword);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
     const { userPassword: pw, ...userWithoutPassword } = user.toObject();
 
     res.status(200).json({
@@ -35,18 +54,37 @@ const loginUser = async (req, res) => {
   }
 };
 
-const changeUserPassword = async (req, res) => {
+const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { newPassword } = req.body;
+  const { userFirstName, userLastName, userPassword } = req.body;
 
   try {
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: "User not found" });
-    user.userPassword = newPassword;
 
-    await user.save();
+    if (userFirstName) user.userFirstName = userFirstName;
+    if (userLastName) user.userLastName = userLastName;
 
-    res.status(200).json({ message: "Password updated successfully" });
+    if (userPassword !== undefined) {
+      const trimmedPass = userPassword ? userPassword.trim() : "";
+      if (trimmedPass.length > 0 && trimmedPass.length < 6) {
+        return res
+          .status(400)
+          .json({ message: "Password must be at least 6 characters" });
+      }
+      if (trimmedPass.length >= 6) {
+        user.userPassword = trimmedPass;
+      }
+    }
+
+    const updatedUser = await user.save();
+
+    const { userPassword: pw, ...userWithoutPassword } = updatedUser.toObject();
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: userWithoutPassword,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -69,11 +107,11 @@ const deleteUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const userList = await User.find({});
+    const userList = await User.find({}).select("-userPassword");
     res.status(200).json(userList);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export { getAllUsers, createUser, changeUserPassword, deleteUser, loginUser };
+export { getAllUsers, createUser, updateUser, deleteUser, loginUser };

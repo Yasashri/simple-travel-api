@@ -27,6 +27,14 @@ const hotelSchema = mongoose.Schema(
       type: Number,
       required: [true, "Please enter room prices"],
     },
+    hotelContact:{
+      type: Number,
+      required: [true, "Please enter contact number"],
+    },
+    hotelCountry:{
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
